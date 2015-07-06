@@ -2,7 +2,7 @@
   (:import [com.netflix.curator.retry RetryNTimes]
            [com.netflix.curator.framework CuratorFramework CuratorFrameworkFactory])
   (:require [noir.session :as session]
-            [noir.request :as req]
+            [noir.request :as req])
   (:refer-clojure :exclude [set get])
   (:use hades-web.util))
 
