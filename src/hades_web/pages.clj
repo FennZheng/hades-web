@@ -8,7 +8,8 @@
             [clojure.string :as str])
   (:use [noir.core]
         [hades-web.util]
-        [hiccup page form element core]))
+        [hiccup page form element core]
+        [hades-web.log]))
 
 ;; util functions
 
@@ -59,10 +60,12 @@
      (if-let [user (session/get :user)]
        [:div
         [:span.badge.badge-info user]
-        (link-to "/logout" [:span.badge.badge-error "Logout"])]
+        (link-to "/logout" [:span.badge.badge-error "Logout"])
+        (link-to "/log" [:span.badge.badge-info "log"])]
        [:div
         [:span.badge "Guest"]
-        (link-to "/login" [:span.badge.badge-success "Login"])])]]
+        (link-to "/login" [:span.badge.badge-success "Login"])
+        (link-to "/log" [:span.badge.badge-info "log"])])]]
    ])
 
 (defpartial footer []
@@ -75,7 +78,8 @@
      [:a.brand {:href "#"} "Admin Tools"]
      [:ul.nav
       (interleave
-       [[:li [:a {:data-toggle "modal" :href "#createModal"} "Create"]]
+       [[:li [:a {:data-toggle "modal" :href "#exportModal"} "Export"]]
+        [:li [:a {:data-toggle "modal" :href "#createModal"} "Create"]]
         [:li [:a {:data-toggle "modal" :href "#editModal"} "Edit"]]
         [:li [:a {:data-toggle "modal" :href "#deleteModal"} "Delete"]]
         [:li [:a {:data-toggle "modal" :href "#rmrModal"} "RMR"]]]
@@ -143,6 +147,19 @@
      [:div.well
       [:p {:style "word-break:break-all;"}
        (str/replace (bytes->str data) #"\n" "<br>")]])])
+
+(defpartial export-tool [path]
+  [:div#exportModal.modal.hide.fade
+   [:div.modal-header [:h4 "Export node data and all the children as a zip file?"]]
+   (form-to [:post "/export"]
+     [:input {:type "hidden" :name "path" :value path}]
+     [:div.modal-body
+      [:div.alert.alert-warn [:h4 "Warning!!"] "Export node data:" [:strong path] " recursively will cost much time, make sure you really need it!"]]
+     [:div.modal-footer
+      [:button.btn.btn-danger "I will perform Export"]
+      (space 1)
+      [:button.btn.btn-success {:data-dismiss "modal"} "Cancel"]])
+   ])
 
 (defpartial create-modal [path]
   [:div#createModal.modal.hide.fade
@@ -225,6 +242,18 @@
          [:button.btn.btn-primary {:type "submit"} "Go"]]]]]
      )))
 
+(defpage "/log" []
+  (let [cookie (cookies/get :history)
+        cookie (if (nil? cookie) "[]" cookie)]
+    (layout
+      [:form.well.span8 {:action "/log" :method "get"}
+       [:div {:class "pannel pannel-default"}
+        [:div {:class "pannel-body"}
+         (apply str (get-last-log))
+         ;;(doseq [x (get-last-log)] (str  "\r\n"))
+         ]]]
+      )))
+
 (defpage "/node" {:keys [path]}
   (let [path (normalize-path path)
         cli (session/get :cli)]
@@ -243,6 +272,7 @@
           (when-admin
            [:div#adminZone
             (admin-tool path)
+            (export-tool path)
             (edit-modal path data)
             (create-modal path)
             (delete-modal path children)
@@ -302,3 +332,8 @@
   (when-admin
    (zk/rmr (session/get :cli) path)
    (resp/redirect (str "/node?path=" (parent path)))))
+
+(defpage [:post "/rmr"]  {:keys [path]}
+  (when-admin
+    (zk/rmr (session/get :cli) path)
+    (resp/redirect (str "/node?path=" (parent path)))))

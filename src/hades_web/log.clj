@@ -9,7 +9,7 @@
 (def ^:dynamic old-mem-log '())
 
 (defn get-last-log []
-  (println (concat old-mem-log mem-log)))
+  (concat old-mem-log mem-log))
 
 (defn reset-mem-log []
   (def old-mem-log mem-log)
@@ -27,6 +27,6 @@
                user-session
                "Guest")
         prev-msg (str (now-string) ",user:" user)
-        log-msg  (str prev-msg ",detail:" msg "\n")]
-    (add-mem-log log-msg)
-    (spit (str "operation-" (date-string) ".log") log-msg :append true)))
+        log-msg  (str prev-msg ",detail:" msg)]
+    (add-mem-log (str log-msg "</br>"))
+    (spit (str "operation-" (date-string) ".log") (str log-msg "/n") :append true)))
