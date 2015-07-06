@@ -52,3 +52,11 @@
 (defn str->int [string]
   (if string
     (Integer. (re-find  #"\d+" string ))))
+
+;; 获取当前日期的字符串形式
+(defn date-string []
+  (.format (java.text.SimpleDateFormat. "yyyyMMdd") (java.util.Date.)))
+
+(defn now-string []
+  (.format (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ss.SSS") (java.util.Date.)))
+

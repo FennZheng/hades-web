@@ -2,7 +2,7 @@
   (:import [com.netflix.curator.retry RetryNTimes]
            [com.netflix.curator.framework CuratorFramework CuratorFrameworkFactory])
   (:require [noir.session :as session]
-            [noir.request :as req])
+            [noir.request :as req]
   (:refer-clojure :exclude [set get])
   (:use hades-web.util))
 
@@ -22,22 +22,23 @@
 (defn oper-log
   "Operation log when invoke CURD .etc"
   [msg]
-  (let [header req/ring-request
-        user (if-let [user-session (session/get :user)]
+  (let [user (if-let [user-session (session/get :user)]
                user-session
                "Guest")
-        prev-msg (str "op-log,user:" user)]
-    (println (str prev-msg ",detail:" msg ",header:" header))))
+        prev-msg (str (now-string) ",user:" user)]
+    (spit (str "operation-" (date-string) ".log") (str prev-msg ",detail:" msg "\n") :append true)))
 
 (defn create
   "Create a node in zk with a client"
   ([cli path data]
-     (-> cli
+    (oper-log (str "create:" path " data:" (java.lang.String. data)))
+    (-> cli
       (.create)
       (.creatingParentsIfNeeded)
       (.forPath path data)))
   ([cli path]
-     (-> cli
+    (oper-log (str "create:" path))
+    (-> cli
          (.create)
          (.creatingParentsIfNeeded)
          (.forPath path))))
@@ -45,13 +46,13 @@
 (defn rm
   "Delete a node in zk with a client"
   [cli path]
-  (oper-log (str "rm data for path:" path))
+  (oper-log (str "rm:" path))
   (-> cli (.delete) (.forPath path)))
 
 (defn ls
   "List children of a node"
   [cli path]
-  (oper-log (str "list children for path:" path))
+  (oper-log (str "ls:" path))
   (-> cli (.getChildren) (.forPath path)))
 
 (defn stat
@@ -62,7 +63,7 @@
 (defn set
   "Set data to a node"
   [cli path data]
-  (oper-log (str "set data for path:" path " data:" data))
+  (oper-log (str "set:" path " data:" (java.lang.String. data)))
   (-> cli (.setData) (.forPath path data)))
 
 (defn get
@@ -73,7 +74,6 @@
 (defn rmr
   "Remove recursively"
   [cli path]
-  (println "rmr " path)
   (doseq [child (ls cli path)]
     (rmr cli (child-path path child)))
   (rm cli path))
