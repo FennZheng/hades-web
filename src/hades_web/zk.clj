@@ -1,10 +1,9 @@
 (ns hades-web.zk
   (:import [com.netflix.curator.retry RetryNTimes]
            [com.netflix.curator.framework CuratorFramework CuratorFrameworkFactory])
-  (:require [noir.session :as session]
-            [noir.request :as req])
   (:refer-clojure :exclude [set get])
-  (:use hades-web.util))
+  (:use hades-web.util)
+  (:use hades-web.log))
 
 (defn- mk-zk-cli-inner
   "Create a zk client using addr as connecting string"
@@ -18,15 +17,6 @@
 
 ;; memorize this function to save net connection
 (def mk-zk-cli (memoize mk-zk-cli-inner))
-
-(defn oper-log
-  "Operation log when invoke CURD .etc"
-  [msg]
-  (let [user (if-let [user-session (session/get :user)]
-               user-session
-               "Guest")
-        prev-msg (str (now-string) ",user:" user)]
-    (spit (str "operation-" (date-string) ".log") (str prev-msg ",detail:" msg "\n") :append true)))
 
 (defn create
   "Create a node in zk with a client"
@@ -78,4 +68,8 @@
     (rmr cli (child-path path child)))
   (rm cli path))
 
+(defn export
+  "Export node data recursively"
+  [cli path]
+  (oper-log (str "export:" path)))
 
