@@ -29,4 +29,4 @@
         prev-msg (str (now-string) ",user:" user)
         log-msg  (str prev-msg ",detail:" msg)]
     (add-mem-log (str log-msg "</br>"))
-    (spit (str "operation-" (date-string) ".log") (str log-msg "/n") :append true)))
+    (spit (str "operation-" (date-string) ".log") (str log-msg "\n") :append true)))
