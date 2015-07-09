@@ -3,7 +3,9 @@
            [com.netflix.curator.framework CuratorFramework CuratorFrameworkFactory])
   (:refer-clojure :exclude [set get])
   (:use hades-web.util)
-  (:use hades-web.log))
+  (:use hades-web.log)
+  (:use clojure.java.io)
+  (:require [clojure.string :as str]))
 
 (defn- mk-zk-cli-inner
   "Create a zk client using addr as connecting string"
@@ -68,8 +70,38 @@
     (rmr cli (child-path path child)))
   (rm cli path))
 
+(defn concat-path
+  [path child]
+    (str/replace (str path "/" child) "//" "/")
+  )
+
+(defn dump-to-file
+  [file-root-path node-path bytes]
+  (let
+    [file-full-path (concat-path file-root-path node-path)]
+    (make-parents file-full-path)
+    (if (not bytes)
+      (println bytes)
+      (spit (str file-full-path ".json") (java.lang.String. bytes)))))
+
+(defn recur-child
+  [cli file-root-path node-path]
+  ;广度优先
+  (doseq [child (ls cli node-path)]
+    (let [key (concat-path node-path child)]
+    (dump-to-file file-root-path key (get cli key))))
+  (if (> (count (ls cli node-path)) 0)
+    (doseq [child (ls cli node-path)]
+      (recur-child cli file-root-path (concat-path node-path child)))))
+
+(defn export-children-to-dir
+  [cli node-path]
+  (let [file-root-path (str "backup/" node-path "-" (file-name-now))]
+  (recur-child cli file-root-path node-path)))
+
 (defn export
   "Export node data recursively"
   [cli path]
-  (oper-log (str "export:" path)))
+  (oper-log (str "export:" path))
+  (export-children-to-dir cli path))
 

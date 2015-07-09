@@ -60,3 +60,6 @@
 (defn now-string []
   (.format (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ss.SSS") (java.util.Date.)))
 
+(defn file-name-now []
+  (.format (java.text.SimpleDateFormat. "yyyyMMdd-HH-mm-ss-SSS") (java.util.Date.)))
+

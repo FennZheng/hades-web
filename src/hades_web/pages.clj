@@ -150,7 +150,7 @@
 
 (defpartial export-tool [path]
   [:div#exportModal.modal.hide.fade
-   [:div.modal-header [:h4 "Export node data and all the children as a zip file?"]]
+   [:div.modal-header [:h4 "Export all the children of parent " path "as a zip file?"]]
    (form-to [:post "/export"]
      [:input {:type "hidden" :name "path" :value path}]
      [:div.modal-body
@@ -250,7 +250,6 @@
        [:div {:class "pannel pannel-default"}
         [:div {:class "pannel-body"}
          (apply str (get-last-log))
-         ;;(doseq [x (get-last-log)] (str  "\r\n"))
          ]]]
       )))
 
@@ -333,7 +332,7 @@
    (zk/rmr (session/get :cli) path)
    (resp/redirect (str "/node?path=" (parent path)))))
 
-(defpage [:post "/rmr"]  {:keys [path]}
+(defpage [:post "/export"]  {:keys [path]}
   (when-admin
-    (zk/rmr (session/get :cli) path)
+    (zk/export (session/get :cli) path)
     (resp/redirect (str "/node?path=" (parent path)))))
