@@ -5,7 +5,8 @@
   (:use hades-web.util)
   (:use hades-web.log)
   (:use clojure.java.io)
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [hades-web.export :as export]))
 
 (defn- mk-zk-cli-inner
   "Create a zk client using addr as connecting string"
@@ -96,8 +97,12 @@
 
 (defn export-children-to-dir
   [cli node-path]
-  (let [file-root-path (str "backup/" node-path "-" (file-name-now))]
-  (recur-child cli file-root-path node-path)))
+  (let
+    [zip-name (backup-file-name node-path)
+     file-root-path (str "backup/" zip-name)]
+    (recur-child cli file-root-path node-path)
+    (export/zip-dir zip-name)
+    ))
 
 (defn export
   "Export node data recursively"

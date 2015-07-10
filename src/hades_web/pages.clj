@@ -1,6 +1,7 @@
 (ns hades-web.pages
   (:require [hades-web.zk :as zk]
             [hades-web.conf :as conf]
+            [hades-web.export :as export]
             [noir.cookies :as cookies]
             [noir.session :as session]
             [noir.response :as resp]
@@ -82,7 +83,8 @@
         [:li [:a {:data-toggle "modal" :href "#createModal"} "Create"]]
         [:li [:a {:data-toggle "modal" :href "#editModal"} "Edit"]]
         [:li [:a {:data-toggle "modal" :href "#deleteModal"} "Delete"]]
-        [:li [:a {:data-toggle "modal" :href "#rmrModal"} "RMR"]]]
+        [:li [:a {:data-toggle "modal" :href "#rmrModal"} "RMR"]]
+        [:li [:a {:href "/list-backup"} "Backup"]]]
        (repeat [:li.divider-vertical])
        )]]
     ]])
@@ -243,15 +245,23 @@
      )))
 
 (defpage "/log" []
-  (let [cookie (cookies/get :history)
-        cookie (if (nil? cookie) "[]" cookie)]
-    (layout
-      [:form.well.span8 {:action "/log" :method "get"}
-       [:div {:class "pannel pannel-default"}
-        [:div {:class "pannel-body"}
-         (apply str (get-last-log))
-         ]]]
-      )))
+  (layout
+    [:form.well.span8 {:action "/log" :method "get"}
+     [:div {:class "pannel pannel-default"}
+      [:div {:class "pannel-body"}
+       (apply str (get-last-log))
+       ]]]
+    ))
+
+(defpage "/list-backup" []
+  (layout
+    [:form.well.span8 {:action "/backup-list" :method "get"}
+     [:div {:class "pannel pannel-default"}
+      [:div {:class "pannel-body"}
+       (for [item (export/list-backup)]
+         [:p [:a {:href (str "/download-backup/" item)} item]])
+       ]]]
+    ))
 
 (defpage "/node" {:keys [path]}
   (let [path (normalize-path path)
@@ -336,3 +346,6 @@
   (when-admin
     (zk/export (session/get :cli) path)
     (resp/redirect (str "/node?path=" (parent path)))))
+
+(defpage [:get "/download-backup/:zip-name"] {zip-name :zip-name}
+  (export/download-backup zip-name))

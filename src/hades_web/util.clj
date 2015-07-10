@@ -1,5 +1,6 @@
 (ns hades-web.util
-  (:require [noir.session :as session])
+  (:require [noir.session :as session]
+            [clojure.string :as str])
   (:import [java.nio.charset Charset]))
 
 (defn bytes->str
@@ -60,6 +61,8 @@
 (defn now-string []
   (.format (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ss.SSS") (java.util.Date.)))
 
-(defn file-name-now []
-  (.format (java.text.SimpleDateFormat. "yyyyMMdd-HH-mm-ss-SSS") (java.util.Date.)))
+(defn backup-file-name [node-path]
+  ; replace "/" when node is root(/)
+  (let [node-path (str/replace node-path "/" "_")]
+    (str "backup_" node-path (.format (java.text.SimpleDateFormat. "_yyyyMMdd_HH_mm_ss_SSS") (java.util.Date.)))))
 
