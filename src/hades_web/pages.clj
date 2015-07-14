@@ -139,7 +139,7 @@
 (defpartial node-data [path data]
   [:div.span4
    [:div.row
-    [:div.span3 [:h3 "Node Data"]]
+    [:div.span3 [:h3 "Node Data" [:a {:href (str "/node-data-show?node-path=" path)} [:span {:class "icon-fullscreen"}]]]]
     [:div.span1
      [:span.span1 (space 1)]
      [:span.label.label-info (count data) " byte(s)"]]]
@@ -348,3 +348,14 @@
 
 (defpage [:get "/download-backup/:zip-name"] {zip-name :zip-name}
   (export/download-backup zip-name))
+
+(defpage [:get "/node-data-show"] {:keys [node-path]}
+  (layout
+    [:form.span8 {:action (str "/node-data-show" node-path) :method "get"}
+     [:p [:h4 (str "Path Data:" node-path)]]
+     [:div {:class "well pannel pannel-default"}
+      [:div {:class "pannel-body"}
+       [:p {:style "white-space: pre;"}
+       (bytes->str (zk/get (session/get :cli) node-path))
+       ]]]]
+  ))
