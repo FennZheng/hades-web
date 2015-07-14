@@ -21,5 +21,4 @@
 
 (defn download-backup
   [zip-name]
-  (println zip-name)
   (resp/file-response (str "backup/" zip-name)))

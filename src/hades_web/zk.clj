@@ -76,31 +76,33 @@
     (str/replace (str path "/" child) "//" "/")
   )
 
-(defn dump-to-file
-  [file-root-path node-path bytes]
+(defn node-to-file
+  [cli node-path args]
   (let
-    [file-full-path (concat-path file-root-path node-path)]
+    [file-root-path args
+    file-full-path (concat-path file-root-path node-path)
+    bytes (get cli node-path)]
     (make-parents file-full-path)
     (if (not bytes)
-      (println bytes)
-      (spit (str file-full-path ".json") (java.lang.String. bytes)))))
+      (spit (str file-full-path ".json") (String. bytes)))))
 
 (defn recur-child
-  [cli file-root-path node-path]
-  ;广度优先
-  (doseq [child (ls cli node-path)]
-    (let [key (concat-path node-path child)]
-    (dump-to-file file-root-path key (get cli key))))
-  (if (> (count (ls cli node-path)) 0)
-    (doseq [child (ls cli node-path)]
-      (recur-child cli file-root-path (concat-path node-path child)))))
+  [cli parent-node func args]
+  (doseq [child-key (ls cli parent-node)]
+    (let [child-node (concat-path parent-node child-key)]
+      (println (str "child-node:" child-node))
+      (func cli child-node args)
+        (doseq [child-child-key (ls cli child-node)]
+          (let [child-child-node (concat-path child-node child-child-key)]
+          (println (str "child-child-node:" child-child-node))
+          (recur-child cli child-child-node func args))))))
 
 (defn export-children-to-dir
   [cli node-path]
   (let
     [zip-name (backup-file-name node-path)
      file-root-path (str "backup/" zip-name)]
-    (recur-child cli file-root-path node-path)
+    (recur-child cli node-path node-to-file file-root-path)
     (export/zip-dir zip-name)
     ))
 
@@ -109,4 +111,5 @@
   [cli path]
   (oper-log (str "export:" path))
   (export-children-to-dir cli path))
+
 
