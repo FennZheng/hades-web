@@ -147,7 +147,7 @@
    (if (nil? data)
      [:div.alert.alert-error "God, zookeeper returns NULL!"]
      [:div.well
-      [:p {:style "word-break:break-all;"}
+      [:p {:style "white-space: pre;"}
        (str/replace (bytes->str data) #"\n" "<br>")]])])
 
 (defpartial export-tool [path]
