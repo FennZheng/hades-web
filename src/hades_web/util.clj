@@ -1,7 +1,8 @@
 (ns hades-web.util
   (:require [noir.session :as session]
             [clojure.string :as str])
-  (:import [java.nio.charset Charset]))
+  (:import [java.nio.charset Charset]
+           [com.alibaba.fastjson JSON]))
 
 (defn bytes->str
   "Convert byte[] to String"
@@ -61,5 +62,10 @@
 (defn now-string []
   (.format (java.text.SimpleDateFormat. "yyyy-MM-dd HH:mm:ss.SSS") (java.util.Date.)))
 
-
-
+(defn validate-json
+  [dataBytes]
+    (try
+      (JSON/parseObject (String. dataBytes) Object)
+      true
+      (catch Exception e
+        false)))
