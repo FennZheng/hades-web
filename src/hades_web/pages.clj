@@ -170,7 +170,7 @@
             [:div.modal-body
              [:div.alert.alert-info  "Create a child under: " [:strong path]]
              [:input {:type "text" :name "name" :placeholder "Name of new node"}]
-             [:textarea.input.span7 {:name "data" :rows 6 :placeholder "Data of new node"}]
+             [:textarea.input.span7 {:name "data" :rows 50 :clos 20 :placeholder "Data of new node"}]
              [:input.span8 {:type "hidden" :name "parent" :value path}]]
             [:div.modal-footer
              [:button.btn.btn-danger  "Create"]
@@ -184,7 +184,7 @@
    (form-to [:post "/edit"]
             [:div.modal-body
              [:div.alert.alert-info "Editing node: " [:strong path]]
-             [:textarea.input.span7 {:type "text" :name "data" :rows 6} (bytes->str data)]
+             [:textarea.input.span7 {:type "text" :name "data" :rows 50 :cols 20} (bytes->str data)]
              [:input.span8 {:type "hidden" :name "path" :value path}]]
             [:div.modal-footer
              [:button.btn.btn-danger  "Save"]
