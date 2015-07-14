@@ -54,19 +54,19 @@
 (defpartial header []
   [:div.span12.page-header
    [:div.row
-    [:div.span10
+    [:div.span9
      [:h1 (link-to "/" "Hades Web")
       [:small (space 4) "Web Managerment for hades"]]]
-    [:div.span2
+    [:div.span3
      (if-let [user (session/get :user)]
        [:div
         [:span.badge.badge-info user]
         (link-to "/logout" [:span.badge.badge-error "Logout"])
-        (link-to "/log" [:span.badge.badge-info "log"])]
+        (link-to "/log" [:span.badge.badge-success "show log"])]
        [:div
         [:span.badge "Guest"]
-        (link-to "/login" [:span.badge.badge-success "Login"])
-        (link-to "/log" [:span.badge.badge-info "log"])])]]
+        (link-to "/login" [:span.badge.badge-info "Login"])
+        (link-to "/log" [:span.badge.badge-success "show log"])])]]
    ])
 
 (defpartial footer []
