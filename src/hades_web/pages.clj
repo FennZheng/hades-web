@@ -344,8 +344,7 @@
 
 (defpage [:post "/export"]  {:keys [path]}
   (when-admin
-    (zk/export (session/get :cli) path)
-    (resp/redirect (str "/node?path=" (parent path)))))
+    (export/export-zip (session/get :cli) path)))
 
 (defpage [:get "/download-backup/:zip-name"] {zip-name :zip-name}
   (export/download-backup zip-name))

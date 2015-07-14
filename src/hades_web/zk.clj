@@ -4,9 +4,8 @@
   (:refer-clojure :exclude [set get])
   (:use hades-web.util)
   (:use hades-web.log)
-  (:use clojure.java.io)
   (:require [clojure.string :as str]
-            [hades-web.export :as export]))
+            [ring.util.response :as resp]))
 
 (defn- mk-zk-cli-inner
   "Create a zk client using addr as connecting string"
@@ -72,44 +71,15 @@
   (rm cli path))
 
 (defn concat-path
-  [path child]
-    (str/replace (str path "/" child) "//" "/")
+  "Return zk children node path"
+  [path child-key]
+    (str/replace (str path "/" child-key) "//" "/")
   )
 
-(defn node-to-file
-  [cli node-path args]
-  (let
-    [file-root-path args
-    file-full-path (concat-path file-root-path node-path)
-    bytes (get cli node-path)]
-    (make-parents file-full-path)
-    (if (not bytes)
-      (spit (str file-full-path ".json") (String. bytes)))))
-
 (defn recur-child
+  "Apply func to node and their children recursively"
   [cli parent-node func args]
   (doseq [child-key (ls cli parent-node)]
     (let [child-node (concat-path parent-node child-key)]
-      (println (str "child-node:" child-node))
       (func cli child-node args)
-        (doseq [child-child-key (ls cli child-node)]
-          (let [child-child-node (concat-path child-node child-child-key)]
-          (println (str "child-child-node:" child-child-node))
-          (recur-child cli child-child-node func args))))))
-
-(defn export-children-to-dir
-  [cli node-path]
-  (let
-    [zip-name (backup-file-name node-path)
-     file-root-path (str "backup/" zip-name)]
-    (recur-child cli node-path node-to-file file-root-path)
-    (export/zip-dir zip-name)
-    ))
-
-(defn export
-  "Export node data recursively"
-  [cli path]
-  (oper-log (str "export:" path))
-  (export-children-to-dir cli path))
-
-
+      (recur-child cli child-node func args))))
