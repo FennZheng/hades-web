@@ -352,7 +352,7 @@
 (defpage [:get "/node-data-show"] {:keys [node-path]}
   (layout
     [:form.span8 {:action (str "/node-data-show" node-path) :method "get"}
-     [:p [:h4 (str "Path Data:" node-path)]]
+     [:p [:h4 (str "Path Data: " node-path)]]
      [:div {:class "well pannel pannel-default"}
       [:div {:class "pannel-body"}
        [:p {:style "white-space: pre;"}
