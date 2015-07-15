@@ -86,7 +86,6 @@
   [cli parent-node func args]
   (doseq [child-key (ls cli parent-node)]
     (let [child-node (concat-path parent-node child-key)]
-      (println (str "kkk:" child-node))
       (func cli child-node args)
       (recur-child cli child-node func args))))
 
@@ -94,7 +93,6 @@
   [cli node path-map]
   (let [to-node (str/replace node (:from path-map) (:to path-map))
         node-data (get cli node)]
-    (println (str "to-node:" to-node))
     (if node-data
       (create cli to-node node-data)
       (create cli to-node))))
