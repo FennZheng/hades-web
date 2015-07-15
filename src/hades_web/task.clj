@@ -28,5 +28,5 @@
       (t/with-identity (t/key "triggers.backup"))
       (t/start-now)
       (t/with-schedule (schedule
-         (cron-schedule "0 0 0/24 * * ?"))))]
+         (cron-schedule "0 0 0 * * ?"))))]
     (qs/schedule s job trigger)))

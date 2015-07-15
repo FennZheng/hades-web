@@ -63,6 +63,11 @@
   [cli path]
   (-> cli (.getData) (.forPath path)))
 
+(defn exists
+  "Check node exists"
+  [cli path]
+  (-> cli (.checkExists) (.forPath path)))
+
 (defn rmr
   "Remove recursively"
   [cli path]
@@ -81,5 +86,34 @@
   [cli parent-node func args]
   (doseq [child-key (ls cli parent-node)]
     (let [child-node (concat-path parent-node child-key)]
+      (println (str "kkk:" child-node))
       (func cli child-node args)
       (recur-child cli child-node func args))))
+
+(defn node->node
+  [cli node path-map]
+  (let [to-node (str/replace node (:from path-map) (:to path-map))
+        node-data (get cli node)]
+    (println (str "to-node:" to-node))
+    (if node-data
+      (create cli to-node node-data)
+      (create cli to-node))))
+
+(defn is-sub-path
+  [from-path to-path]
+  (.start-with from-path to-path)
+  )
+
+(defn copy-node
+  "copy node with children"
+  [cli from-path to-path]
+  ; to-path must not exists, to-path must not be a child of from-path
+  (if
+    (not
+      (and
+        (exists cli to-path)
+        (.startsWith to-path from-path)))
+    (do
+      (create cli to-path)
+      (let [path-map {:from from-path :to to-path}]
+        (recur-child cli from-path node->node path-map)))))

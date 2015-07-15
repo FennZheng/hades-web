@@ -62,11 +62,11 @@
        [:div
         [:span.badge.badge-info user]
         (link-to "/logout" [:span.badge.badge-error "Logout"])
-        (link-to "/log" [:span.badge.badge-success "show log"])]
+        (link-to "/log" [:span.badge.badge-success "Log"])]
        [:div
         [:span.badge "Guest"]
         (link-to "/login" [:span.badge.badge-info "Login"])
-        (link-to "/log" [:span.badge.badge-success "show log"])])]]
+        (link-to "/log" [:span.badge.badge-success "Log"])])]]
    ])
 
 (defpartial footer []
@@ -80,6 +80,7 @@
      [:ul.nav
       (interleave
        [[:li [:a {:data-toggle "modal" :href "#exportModal"} "Export"]]
+        [:li [:a {:data-toggle "modal" :href "#copyModal"} "Copy"]]
         [:li [:a {:data-toggle "modal" :href "#createModal"} "Create"]]
         [:li [:a {:data-toggle "modal" :href "#editModal"} "Edit"]]
         [:li [:a {:data-toggle "modal" :href "#deleteModal"} "Delete"]]
@@ -150,7 +151,7 @@
       [:p {:style "white-space: pre;"}
        (str/replace (bytes->str data) #"\n" "<br>")]])])
 
-(defpartial export-tool [path]
+(defpartial export-modal [path]
   [:div#exportModal.modal.hide.fade
    [:div.modal-header [:h4 "Export all the children of parent " path "as a zip file?"]]
    (form-to [:post "/export"]
@@ -162,6 +163,20 @@
       (space 1)
       [:button.btn.btn-success {:data-dismiss "modal"} "Cancel"]])
    ])
+
+(defpartial copy-modal [path]
+  [:div#copyModal.modal.hide.fade
+   [:div.modal-header [:h4 "Copy Node With Children"]]
+   (form-to [:post "/copy"]
+     [:div.modal-body
+      [:div.alert.alert-info "Copy node: " [:strong path]]
+      [:input.span7 {:type "text" :name "to-path"}]
+      [:input.span8 {:type "hidden" :name "path" :value path}]]
+     [:div.modal-footer
+      [:button.btn.btn-danger  "Save"]
+      (space 1)
+      [:button.btn.btn-success {:data-dismiss "modal"} "Cancel"]
+      ])])
 
 (defpartial create-modal [path]
   [:div#createModal.modal.hide.fade
@@ -281,7 +296,8 @@
           (when-admin
            [:div#adminZone
             (admin-tool path)
-            (export-tool path)
+            (export-modal path)
+            (copy-modal path)
             (edit-modal path data)
             (create-modal path)
             (delete-modal path children)
@@ -359,3 +375,8 @@
        (bytes->str (zk/get (session/get :cli) node-path))
        ]]]]
   ))
+
+(defpage [:post "/copy"] {:keys [path to-path]}
+  (when-admin
+    (zk/copy-node (session/get :cli) path to-path)
+  (resp/redirect (str "/node?path=" path))))
