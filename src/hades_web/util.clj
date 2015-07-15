@@ -34,6 +34,12 @@
   `(when (session/get :user)
      ~@exprs))
 
+(defn get-user []
+  (try
+  (session/get :user "Guest")
+    (catch Exception e "Anonymous"))
+  )
+
 (defn drop-last-while
   "Drop from last while pred is true"
   [pred coll]

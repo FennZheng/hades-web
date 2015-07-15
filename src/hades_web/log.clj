@@ -23,9 +23,7 @@
 (defn oper-log
   "Operation log when invoke CURD .etc"
   [msg]
-  (let [user (if-let [user-session (session/get :user)]
-               user-session
-               "Guest")
+  (let [user (get-user)
         prev-msg (str (now-string) ",user:" user)
         log-msg  (str prev-msg ",detail:" msg)]
     (add-mem-log (str log-msg "</br>"))

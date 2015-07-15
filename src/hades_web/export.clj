@@ -4,7 +4,8 @@
             [clojure.string :as str]
             [clojure.java.io :as io]
             [ring.util.response :as resp]
-            [hades-web.zk :as zk])
+            [hades-web.zk :as zk]
+            [hades-web.conf :as conf])
   (:use hades-web.log)
   (:import [java.nio.charset Charset]))
 
@@ -46,7 +47,7 @@
     [zip-root args
      file-full-path (zk/concat-path zip-root node-path)
      file-name (str file-full-path ".json")
-     bytes (get cli node-path)]
+     bytes (zk/get cli node-path)]
     (io/make-parents file-full-path)
     (if (not bytes)
       (spit file-name "")
@@ -54,19 +55,29 @@
 
 (defn export-children-as-zip
   "Export/zip/download"
+  [cli node-path zip-name zip-root]
+  (zk/recur-child cli node-path node-to-file zip-root)
+  (zip-dir zip-name))
+
+(defn backup
+  [node-path]
+  (let
+    [zip-name (generate-zip-name node-path)
+     zip-root (get-zip-path zip-name)
+     addr (:zk-address (conf/load-conf))
+     cli (zk/mk-zk-cli addr)]
+    (export-children-as-zip cli node-path zip-name zip-root)
+    ))
+
+(defn export-zip
+  "Export node data recursively as a zip file"
   [cli node-path]
+  (oper-log (str "export:" node-path))
   (let
     [zip-name (generate-zip-name node-path)
      zip-root (get-zip-path zip-name)]
-    (zk/recur-child cli node-path node-to-file zip-root)
-    (zip-dir zip-name)
+    (export-children-as-zip cli node-path zip-name zip-root)
     (resp/header
       (resp/file-response (str zip-root ".zip"))
       "Content-Disposition"
       (str "attachment; filename=" zip-name ".zip"))))
-
-(defn export-zip
-  "Export node data recursively as a zip file"
-  [cli path]
-  (oper-log (str "export:" path))
-  (export-children-as-zip cli path))
