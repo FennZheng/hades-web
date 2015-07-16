@@ -9,7 +9,7 @@
 (def ^:dynamic old-mem-log '())
 
 (defn get-last-log []
-  (concat old-mem-log mem-log))
+  (concat mem-log old-mem-log))
 
 (defn reset-mem-log []
   (def old-mem-log mem-log)
