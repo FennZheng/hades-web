@@ -148,7 +148,7 @@
    (if (nil? data)
      [:div.alert.alert-error "God, zookeeper returns NULL!"]
      [:div.well
-      [:p {:style "white-space: pre;"}
+      [:p {:style "white-space: nowrap;"}
        (str/replace (bytes->str data) #"\n" "<br>")]])])
 
 (defpartial export-modal [path]
@@ -371,7 +371,7 @@
      [:p [:h4 (str "Path Data: " node-path)]]
      [:div {:class "well pannel pannel-default"}
       [:div {:class "pannel-body"}
-       [:p {:style "white-space: pre;"}
+       [:p {:style "white-space: pre-wrap;"}
        (bytes->str (zk/get (session/get :cli) node-path))
        ]]]]
   ))
