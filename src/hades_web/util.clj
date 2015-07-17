@@ -1,6 +1,7 @@
 (ns hades-web.util
   (:require [noir.session :as session]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [digest :as digest])
   (:import [java.nio.charset Charset]
            [com.alibaba.fastjson JSON]))
 
@@ -9,6 +10,13 @@
   [bytes]
   (if bytes
     (String. bytes (Charset/forName "UTF-8"))
+    ""))
+
+(defn bytes->md5
+  "Convert byte[] to String"
+  [bytes]
+  (if bytes
+    (digest/md5 (String. bytes (Charset/forName "UTF-8")))
     ""))
 
 (defn normalize-path

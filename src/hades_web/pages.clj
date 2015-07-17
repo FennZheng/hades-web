@@ -2,6 +2,7 @@
   (:require [hades-web.zk :as zk]
             [hades-web.conf :as conf]
             [hades-web.export :as export]
+            [hades-web.statistics :as statistics]
             [noir.cookies :as cookies]
             [noir.session :as session]
             [noir.response :as resp]
@@ -35,8 +36,15 @@
         referer (header "referer")]
     referer))
 
+(defn add-ns
+  [addr]
+  (let [addr (str/trim addr)]
+    (if (not (.endsWith addr "/hades"))
+      (str addr "/hades")
+      addr)))
+
 (defn init-zk-client [addr]
-  (let [addr (str/trim addr)
+  (let [addr (add-ns addr)
         cookie-str (cookies/get :history)
         cookie-str (if (nil? cookie-str) "[]" cookie-str)
         cookie (read-string cookie-str)
@@ -56,7 +64,7 @@
    [:div.row
     [:div.span9
      [:h1 (link-to "/" "Hades Web")
-      [:small (space 4) "Web Managerment for hades"]]]
+      [:small (space 4) "Web managerment for hades"]]]
     [:div.span3
      (if-let [user (session/get :user)]
        [:div
@@ -79,7 +87,8 @@
      [:a.brand {:href "#"} "Admin Tools"]
      [:ul.nav
       (interleave
-       [[:li [:a {:data-toggle "modal" :href "#exportModal"} "Export"]]
+       [[:li [:a {:data-toggle "modal" :href "#checkStatusModal"} "Check Status"]]
+        [:li [:a {:data-toggle "modal" :href "#exportModal"} "Export"]]
         [:li [:a {:data-toggle "modal" :href "#copyModal"} "Copy"]]
         [:li [:a {:data-toggle "modal" :href "#createModal"} "Create"]]
         [:li [:a {:data-toggle "modal" :href "#editModal"} "Edit"]]
@@ -150,6 +159,22 @@
      [:div.well
       [:p {:style "white-space: nowrap;"}
        (str/replace (bytes->str data) #"\n" "<br>")]])])
+
+(defpartial check-status-modal []
+  [:div#checkStatusModal.modal.hide.fade
+   [:div.modal-header [:h4 "Check All Clients' Data Status"]]
+   (form-to [:post "/check-status"]
+     [:div.modal-body
+      [:div.alert.alert-error [:h4 "Warning!!"] "是否需要发起校验所有hades client的内存数据一致性？"]
+      [:p [:span.span3 "Group name（default:main）:"]
+       [:input {:type "text" :name "group" :value nil} ]]
+      [:p [:span.span3"Project name（default:ad）:"]
+       [:input {:type "text" :name "project" :value nil}]]]
+     [:div.modal-footer
+      [:button.btn.btn-danger "Submit"]
+      (space 1)
+      [:button.btn.btn-success {:data-dismiss "modal"} "Cancel"]])
+   ])
 
 (defpartial export-modal [path]
   [:div#exportModal.modal.hide.fade
@@ -254,7 +279,7 @@
       [:div.span8
        [:div.row
         [:div.span6
-         [:input.span6 {:type "text" :name "addr" :placeholder "Connect String: host[:port][/namespace]"}]]
+         [:input.span6 {:type "text" :name "addr" :placeholder "Connect String: host[:port]"}]]
         [:div.span2
          [:button.btn.btn-primary {:type "submit"} "Go"]]]]]
      )))
@@ -296,6 +321,7 @@
           (when-admin
            [:div#adminZone
             (admin-tool path)
+            (check-status-modal)
             (export-modal path)
             (copy-modal path)
             (edit-modal path data)
@@ -380,3 +406,16 @@
   (when-admin
     (zk/copy-node (session/get :cli) path to-path)
   (resp/redirect (str "/node?path=" path))))
+
+
+(defpage [:post "/check-status"] {:keys [group project]}
+  (when-admin
+    (layout
+      [:form.well.span8 {:action "/check-status" :method "post"}
+       [:div {:class "pannel pannel-default"}
+        [:div {:class "pannel-body"}
+         (let [group (if (str/blank? group) "main" group)
+               project (if (str/blank? project) "ad" project)]
+          (statistics/check-status (session/get :cli) group project))
+         ]]]
+      )))
