@@ -37,8 +37,7 @@
 
 (defn get-status-data
   [cli group project]
-  (let [root-path (status-root-path<- group project)
-        _ (println root-path)]
+  (let [root-path (status-root-path<- group project)]
     (loop [status-map (hash-map)
            ids (zk/ls cli root-path)]
       (if (> (count ids) 0)
