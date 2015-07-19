@@ -70,6 +70,7 @@
     (str "<strong>server-id: " server-id " expired data:</strong><br><blockquote>" error-msg "</blockquote>")
   ))
 
+
 (defn check-status
   [cli group project]
   (let [zk-data-map (get-zk-data cli group project)]
@@ -82,5 +83,9 @@
             (str msg (generate-server-check-msg
                        server-id
                        (compare->server-data&zk-data server-id value zk-data-map)))))
-       msg))))
+        (if (str/blank? msg)
+          (str "No client export statistics to zk.
+            See <a href='/node?path=" (status-root-path<- group project) "'
+            >/hades" (status-root-path<- group project) "</a>")
+          msg)))))
 

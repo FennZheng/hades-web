@@ -194,8 +194,9 @@
    [:div.modal-header [:h4 "Copy Node With Children"]]
    (form-to [:post "/copy"]
      [:div.modal-body
-      [:div.alert.alert-info "Copy node: " [:strong path]]
-      [:input.span7 {:type "text" :name "to-path"}]
+      [:div.alert.alert-info "Copy from node: " [:strong path]]
+      [:span.span2 "To new path: "]
+      [:input.span4 {:type "text" :name "to-path"}]
       [:input.span8 {:type "hidden" :name "path" :value path}]]
      [:div.modal-footer
       [:button.btn.btn-danger  "Save"]
@@ -416,6 +417,10 @@
         [:div {:class "pannel-body"}
          (let [group (if (str/blank? group) "main" group)
                project (if (str/blank? project) "ad" project)]
-          (statistics/check-status (session/get :cli) group project))
+          (try
+            (statistics/check-status (session/get :cli) group project)
+           (catch Exception e (str "No node found for group:" group " project:" project))
+             )
+           )
          ]]]
       )))
