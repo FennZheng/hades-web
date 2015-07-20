@@ -30,7 +30,7 @@
 
 (defn list-backup
   []
-  (oper-log "list-backup")
+  #_(oper-log "list-backup")
   (shell/with-sh-dir backup-dir
     (str/split-lines(:out (shell/sh "ls" "-t")))))
 

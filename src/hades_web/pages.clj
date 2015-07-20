@@ -11,7 +11,8 @@
   (:use [noir.core]
         [hades-web.util]
         [hiccup page form element core]
-        [hades-web.log]))
+        [hades-web.log]
+        [hades-web.i18n]))
 
 ;; util functions
 
@@ -165,24 +166,24 @@
    [:div.modal-header [:h4 "Check All Clients' Data Status"]]
    (form-to [:post "/check-status"]
      [:div.modal-body
-      [:div.alert.alert-error [:h4 "Warning!!"] "是否需要发起校验所有hades client的内存数据一致性？"]
+      [:div.alert.alert-error [:h4 "Warning!!"] (i18n-> "check-status-alert")]
       [:p [:span.span3 "Group name（default:main）:"]
        [:input {:type "text" :name "group" :value nil} ]]
       [:p [:span.span3"Project name（default:ad）:"]
        [:input {:type "text" :name "project" :value nil}]]]
      [:div.modal-footer
-      [:button.btn.btn-danger "Submit"]
+      [:button.btn.btn-danger "Run checking.."]
       (space 1)
       [:button.btn.btn-success {:data-dismiss "modal"} "Cancel"]])
    ])
 
 (defpartial export-modal [path]
   [:div#exportModal.modal.hide.fade
-   [:div.modal-header [:h4 "Export all the children of parent " path "as a zip file?"]]
+   [:div.modal-header [:h4 "Export path: " path " as a zip file?"]]
    (form-to [:post "/export"]
      [:input {:type "hidden" :name "path" :value path}]
      [:div.modal-body
-      [:div.alert.alert-warn [:h4 "Warning!!"] "Export node data:" [:strong path] " recursively will cost much time, make sure you really need it!"]]
+      [:div.alert.alert-warn [:h4 "Warning!!"] (i18n-> "export-alert")]]
      [:div.modal-footer
       [:button.btn.btn-danger "I will perform Export"]
       (space 1)
@@ -195,11 +196,11 @@
    (form-to [:post "/copy"]
      [:div.modal-body
       [:div.alert.alert-info "Copy from node: " [:strong path]]
-      [:span.span2 "To new path: "]
+      [:span.span2 "To <strong><font color='red'>new path</font></strong>: "]
       [:input.span4 {:type "text" :name "to-path"}]
       [:input.span8 {:type "hidden" :name "path" :value path}]]
      [:div.modal-footer
-      [:button.btn.btn-danger  "Save"]
+      [:button.btn.btn-danger  "Run copy.."]
       (space 1)
       [:button.btn.btn-success {:data-dismiss "modal"} "Cancel"]
       ])])
@@ -259,7 +260,7 @@
    (form-to [:post "/rmr"]
             [:input {:type "hidden" :name "path" :value path}]
             [:div.modal-body
-             [:div.alert.alert-error [:h4 "Danger!!"] " 你确认要删除该节点和所有子节点吗？ node:" [:strong path]]]
+             [:div.alert.alert-error [:h4 "Danger!!"] (i18n-> "rmr-alert") " node:" [:strong path]]]
             [:div.modal-footer
              [:button.btn.btn-danger "I will perform RMR"]
              (space 1)
@@ -299,6 +300,7 @@
     [:form.well.span8 {:action "/backup-list" :method "get"}
      [:div {:class "pannel pannel-default"}
       [:div {:class "pannel-body"}
+       (i18n-> "backup-tip")
        (for [item (export/list-backup)]
          [:p [:a {:href (str "/download-backup/" item)} item]])
        ]]]
