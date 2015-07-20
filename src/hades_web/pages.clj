@@ -93,7 +93,7 @@
         [:li [:a {:data-toggle "modal" :href "#createModal"} "Create"]]
         [:li [:a {:data-toggle "modal" :href "#editModal"} "Edit"]]
         [:li [:a {:data-toggle "modal" :href "#deleteModal"} "Delete"]]
-        [:li [:a {:data-toggle "modal" :href "#rmrModal"} "RMR"]]
+        [:li [:a {:data-toggle "modal" :href "#rmrModal"} "Delete -R"]]
         [:li [:a {:href "/list-backup"} "Backup"]]]
        (repeat [:li.divider-vertical])
        )]]
@@ -255,11 +255,11 @@
 
 (defpartial rmr-modal [path]
   [:div#rmrModal.modal.hide.fade
-   [:div.modal-header [:h4 "Delete This Node And It's Children"]]
+   [:div.modal-header [:h4 "Delete This Node And Its Children"]]
    (form-to [:post "/rmr"]
             [:input {:type "hidden" :name "path" :value path}]
             [:div.modal-body
-             [:div.alert.alert-error [:h4 "Danger!!"] "RMR will delete " [:strong path] " and all it's children!"]]
+             [:div.alert.alert-error [:h4 "Danger!!"] " 你确认要删除该节点和所有子节点吗？ node:" [:strong path]]]
             [:div.modal-footer
              [:button.btn.btn-danger "I will perform RMR"]
              (space 1)
