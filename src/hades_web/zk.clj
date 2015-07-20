@@ -44,7 +44,7 @@
 (defn ls
   "List children of a node"
   [cli path]
-  (oper-log (str "ls:" path))
+  #_(oper-log (str "ls:" path))
   (-> cli (.getChildren) (.forPath path)))
 
 (defn stat
