@@ -20,6 +20,11 @@
   (let [node-path (str/replace node-path "/" "_")]
     (str "backup_" node-path (.format (java.text.SimpleDateFormat. "_yyyyMMdd_HH_mm_ss_SSS") (java.util.Date.)))))
 
+(defn generate->zip-file-path
+  [zip-name]
+  ; zip-name with/without ext name
+  (str/replace (str backup-dir zip-name ".zip") ".zip.zip" ".zip"))
+
 (defn zip-dir
   [zip-name]
   (shell/with-sh-dir "backup/"
@@ -38,7 +43,7 @@
   "Download a backup zip file"
   [zip-name]
   (oper-log (str "download-backup:" zip-name))
-  (resp/file-response (get-zip-path zip-name)))
+  (resp/file-response (generate->zip-file-path zip-name)))
 
 (defn generate->node-file-path
   [dumpfile-root-path node-path]
@@ -70,7 +75,7 @@
   (let
     [zip-name (generate->zip-name node-path)
      dumpfile-root-path (generate->dumpfile-root-path zip-name)
-     zip-file-path (str dumpfile-root-path ".zip")]
+     zip-file-path (generate->zip-file-path zip-name)]
     (export-children-as-zip cli node-path zip-name dumpfile-root-path)
     {"zip-name" zip-name
      "zip-file-path" zip-file-path
