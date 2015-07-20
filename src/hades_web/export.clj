@@ -11,11 +11,11 @@
 
 (def backup-dir "backup/")
 
-(defn get-zip-path
+(defn generate->dumpfile-root-path
   [zip-name]
   (str backup-dir zip-name))
 
-(defn generate-zip-name [node-path]
+(defn generate->zip-name [node-path]
   ; replace "/" when node is root(/)
   (let [node-path (str/replace node-path "/" "_")]
     (str "backup_" node-path (.format (java.text.SimpleDateFormat. "_yyyyMMdd_HH_mm_ss_SSS") (java.util.Date.)))))
@@ -40,44 +40,55 @@
   (oper-log (str "download-backup:" zip-name))
   (resp/file-response (get-zip-path zip-name)))
 
+(defn generate->node-file-path
+  [dumpfile-root-path node-path]
+  (zk/concat-path dumpfile-root-path node-path))
+
 (defn node-to-file
   "Dump node data to a xx.json"
-  [cli node-path args]
+  [cli node-path dumpfile-root-path]
   (let
-    [zip-root args
-     file-full-path (zk/concat-path zip-root node-path)
-     file-name (str file-full-path ".json")
+    [node-file-path (generate->node-file-path dumpfile-root-path node-path)
+     node-file-name (str node-file-path ".json")
      bytes (zk/get cli node-path)]
-    (io/make-parents file-full-path)
+    (io/make-parents node-file-path)
     (if (not bytes)
-      (spit file-name "")
-      (spit file-name (String. bytes)))))
+      (spit node-file-name "")
+      (spit node-file-name (String. bytes)))))
 
 (defn export-children-as-zip
   "Export/zip/download"
-  [cli node-path zip-name zip-root]
-  (zk/recur-child cli node-path node-to-file zip-root)
+  [cli node-path zip-name dumpfile-root-path]
+  ((zk/recur-child-partial node-to-file dumpfile-root-path) cli node-path)
   (zip-dir zip-name))
 
 (defn backup
-  [node-path]
+  "Do backup node-path with its children ,and return {zip-name/zip-file-path} map"
+  ([node-path]
+  (backup (zk/mk-zk-cli (:zk-address (conf/load-conf))) node-path))
+  ([cli node-path]
   (let
-    [zip-name (generate-zip-name node-path)
-     zip-root (get-zip-path zip-name)
-     addr (:zk-address (conf/load-conf))
-     cli (zk/mk-zk-cli addr)]
-    (export-children-as-zip cli node-path zip-name zip-root)
-    ))
+    [zip-name (generate->zip-name node-path)
+     dumpfile-root-path (generate->dumpfile-root-path zip-name)
+     zip-file-path (str dumpfile-root-path ".zip")]
+    (export-children-as-zip cli node-path zip-name dumpfile-root-path)
+    {"zip-name" zip-name
+     "zip-file-path" zip-file-path
+     })))
+
+(defn backup-finished->download
+  [zip-info-map]
+  (let [zip-name (zip-info-map "zip-name")
+        zip-file-path (zip-info-map "zip-file-path")]
+    (resp/header
+      (resp/file-response zip-file-path)
+      "Content-Disposition"
+      (str "attachment; filename=" zip-name ".zip"))))
 
 (defn export-zip
   "Export node data recursively as a zip file"
   [cli node-path]
   (oper-log (str "export:" node-path))
-  (let
-    [zip-name (generate-zip-name node-path)
-     zip-root (get-zip-path zip-name)]
-    (export-children-as-zip cli node-path zip-name zip-root)
-    (resp/header
-      (resp/file-response (str zip-root ".zip"))
-      "Content-Disposition"
-      (str "attachment; filename=" zip-name ".zip"))))
+  (-> (backup cli node-path)
+    (backup-finished->download)
+    ))

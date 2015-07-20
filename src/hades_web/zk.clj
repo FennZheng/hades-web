@@ -82,6 +82,7 @@
   )
 
 (defn recur-child-partial
+  "Apply f to all the children of parent-node recursively"
   [f args]
   (defn r [cli parent-node]
     (doseq [child-key (ls cli parent-node)]
