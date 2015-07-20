@@ -81,13 +81,13 @@
     (str/replace (str path "/" child-key) "//" "/")
   )
 
-(defn recur-child
-  "Apply func to node and their children recursively"
-  [cli parent-node func args]
-  (doseq [child-key (ls cli parent-node)]
-    (let [child-node (concat-path parent-node child-key)]
-      (func cli child-node args)
-      (recur-child cli child-node func args))))
+(defn recur-child-partial
+  [f args]
+  (defn r [cli parent-node]
+    (doseq [child-key (ls cli parent-node)]
+      (let [child-node (concat-path parent-node child-key)]
+        (f cli child-node args)
+        (r cli child-node)))) r)
 
 (defn node->node
   [cli node path-map]
@@ -114,4 +114,4 @@
     (do
       (create cli to-path)
       (let [path-map {:from from-path :to to-path}]
-        (recur-child cli from-path node->node path-map)))))
+        ((recur-child-partial node->node path-map) cli from-path)))))
