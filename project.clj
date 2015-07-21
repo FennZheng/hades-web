@@ -1,4 +1,4 @@
-(defproject hades-web "0.1.1"
+(defproject hades-web "1.0.0"
             :description "FIXME: write this!"
             :dependencies [[org.clojure/clojure "1.7.0"]
                            [noir "1.3.0-beta3"]
