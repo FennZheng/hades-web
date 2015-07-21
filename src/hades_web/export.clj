@@ -4,8 +4,7 @@
             [clojure.string :as str]
             [clojure.java.io :as io]
             [ring.util.response :as resp]
-            [hades-web.zk :as zk]
-            [hades-web.conf :as conf])
+            [hades-web.zk :as zk])
   (:use hades-web.log)
   (:import [java.nio.charset Charset]))
 
@@ -70,7 +69,7 @@
 (defn backup
   "Do backup node-path with its children ,and return {zip-name/zip-file-path} map"
   ([node-path]
-  (backup (zk/mk-zk-cli (:zk-address (conf/load-conf))) node-path))
+  (backup (zk/get-default-zk-cli) node-path))
   ([cli node-path]
   (let
     [zip-name (generate->zip-name node-path)

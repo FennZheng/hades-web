@@ -427,3 +427,15 @@
          ]]]
       )))
 
+;; data remote api
+(defpage [:get "/data"] {:keys [node-path inner-level]}
+  (try
+    (zk/get-data-recursively (remove-end-slash node-path) (remove-head-slash inner-level))
+    (catch Exception e (println (str "Get /data error:" e)) "")
+    ))
+
+(defpage [:get "/data-ls"] {:keys [node-path]}
+  (try
+    (zk/ls-data (remove-end-slash node-path))
+    (catch Exception e (println (str "Get /data-ls error:" e)) "")
+    ))

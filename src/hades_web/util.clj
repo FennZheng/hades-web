@@ -69,6 +69,18 @@
   (if string
     (Integer. (re-find  #"\d+" string ))))
 
+(defn remove-end-slash
+  [data-str]
+  (if (str/blank? data-str)
+    data-str
+    (str/replace data-str #"/+$" "")))
+
+(defn remove-head-slash
+  [data-str]
+  (if (str/blank? data-str)
+    data-str
+    (str/replace data-str #"^/+" "")))
+
 ;; 获取当前日期的字符串形式
 (defn date-string []
   (.format (java.text.SimpleDateFormat. "yyyyMMdd") (java.util.Date.)))

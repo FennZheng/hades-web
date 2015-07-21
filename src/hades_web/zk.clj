@@ -1,11 +1,13 @@
 (ns hades-web.zk
   (:import [com.netflix.curator.retry RetryNTimes]
-           [com.netflix.curator.framework CuratorFramework CuratorFrameworkFactory])
+           [com.netflix.curator.framework CuratorFramework CuratorFrameworkFactory]
+           [com.alibaba.fastjson JSON])
   (:refer-clojure :exclude [set get])
   (:use hades-web.util)
   (:use hades-web.log)
   (:require [clojure.string :as str]
-            [ring.util.response :as resp]))
+            [ring.util.response :as resp]
+            [hades-web.conf :as conf]))
 
 (defn- mk-zk-cli-inner
   "Create a zk client using addr as connecting string"
@@ -19,6 +21,10 @@
 
 ;; memorize this function to save net connection
 (def mk-zk-cli (memoize mk-zk-cli-inner))
+
+(defn get-default-zk-cli
+  []
+  (mk-zk-cli (:zk-address (conf/load-conf))))
 
 (defn create
   "Create a node in zk with a client"
@@ -68,6 +74,13 @@
   [cli path]
   (-> cli (.checkExists) (.forPath path)))
 
+(defn get-if-exists
+  "Get data from a node if it exists or return nil"
+  [cli path]
+  (if (exists cli path)
+    (get cli path)
+    nil))
+
 (defn rmr
   "Remove recursively"
   [cli path]
@@ -104,7 +117,7 @@
   )
 
 (defn copy-node
-  "copy node with children"
+  "Copy node with children"
   [cli from-path to-path]
   ; to-path must not exists, to-path must not be a child of from-path
   (if
@@ -116,3 +129,32 @@
       (create cli to-path)
       (let [path-map {:from from-path :to to-path}]
         ((recur-child-partial node->node path-map) cli from-path)))))
+
+(defn- get-from-jsonstr
+  [str key]
+  (.get (JSON/parseObject str java.util.Map) key))
+
+(defn fetch-in-level
+  "Fetch data from a JSON string by level"
+  [data level-str]
+    (loop [data-str data
+           levels (str/split level-str #"/")]
+      (if (> (count levels) 0)
+        (recur (get-from-jsonstr data-str (first levels)) (rest levels))
+        data-str))
+    )
+
+(defn get-data-recursively
+  [node-path inner-level]
+  (let [cli (get-default-zk-cli)
+    node-data (bytes->str (get-if-exists cli node-path))]
+    (if (str/blank? inner-level)
+      node-data
+      (fetch-in-level node-data inner-level)))
+    )
+
+(defn ls-data
+  [node-path]
+  (let [cli (get-default-zk-cli)]
+    (JSON/toJSONString (ls cli node-path)))
+  )
