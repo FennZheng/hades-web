@@ -5,7 +5,7 @@
   (:import [java.nio.charset Charset]))
 
 ;zh/en
-(def language "zh")
+(def language "en")
 
 (def zh-properties {"export-alert" "是否导出该节点和所有的子节点? 导出文件自动备份至
                                    <a href='/list-backup'/>备份目录</a>"

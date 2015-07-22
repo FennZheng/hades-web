@@ -22,9 +22,9 @@
         conf     (or (load-conf-file home-conf) (load-conf-file pwd-conf)
                   {
                    :server-port 9011
-                   :users {"admin" "hermes_hades"}
-                   :default-node "192.168.16.235:2181/hades"
-                   :zk-address "192.168.16.235:2181"
+                   :users {"admin" "hades"}
+                   :default-node "192.168.113.86:2181/hades"
+                   :zk-address "192.168.113.86:2181"
                   })]
         (if env-port
           (assoc conf :server-port env-port)
