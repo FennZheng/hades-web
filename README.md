@@ -18,6 +18,8 @@ Leiningen：http://leiningen.org/
 
 ###2.1 Run in local
 
+
+<code>
 git clone https://github.com/vernonzheng/hades-web
 
 cd hades-web
@@ -25,15 +27,19 @@ cd hades-web
 lein deps # run this if you're using lein 1.x
 
 lein run
+</code>
 
 
 ###2.2 Deploy and run
  
+
+<code>
 lein uberjar
 
 cd target
 
 jar -jar hades-web-x.x.x-standalone.jar
+</code>
 
 
 ##3. Features
