@@ -52,22 +52,26 @@ You could use this feature to create a new group or project from a exists node.
 
 For an example: http://127.0.0.1:9011/data?node-path=/hades/configs/main/ad/log&inner-level=root/loggers
 
-<strong>Parameters:<strong>
+**Parameters:**
+
 + node-path: node path in zookeeper
 
 + inner-level: inner level in node data(data must be a JSON string), levels split by '/'.
 
-<strong>Return:<strong>
+**Return:**
+
 JSON data as string
 
 ####3.6.2 List Node's children
 
 For an example: http://127.0.0.1:9011/data-ls?node-path=/hades/configs/main/ad
 
-<strong>Parameters:<strong>
+**Parameters:**
+
 + node-path: node path in zookeeper
 
-<strong>Return:<strong>
+**Return:**
+
 JSON data as Array
 
 ###3.7 Backup
