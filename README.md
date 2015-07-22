@@ -59,6 +59,8 @@ You could use this feature to create a new group or project from a exists node.
 
 ###3.5 Check client status
 
+Check all hades client status by comparing their memory data versions with zookeeper data versions.
+
 
 ###3.6 Remote API
 
