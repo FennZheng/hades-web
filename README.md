@@ -41,9 +41,9 @@ Leiningen：http://leiningen.org/
 ##3. Features##
 
 
-Default Admin Role/password: admin/hades
+Default Admin Role/Password: admin/hades
 
-Language Change: en/zh (modify i18n.clj/language using zh/en)
+Language Change: en/zh (replace i18n.clj/language by zh/en)
 
 
 ###3.1 Show node data###
@@ -68,7 +68,7 @@ You could use this feature to create a new group or project from a exists node.
 ###3.5 Check client status###
 
 
-Check all hades client status by comparing their memory data versions with zookeeper data versions.
+Check all hades client status by comparing their memory data versions to zookeeper data versions.
 
 
 ###3.6 Remote API###
